@@ -1,23 +1,35 @@
 <template>
   <div id="app">
-    <img src="./assets/logo.png">
     <router-view/>
   </div>
 </template>
 
 <script>
-export default {
-  name: 'App'
-}
+  import 'bootstrap/dist/js/bootstrap.min'
+  export default {
+    name: 'App',
+    methods: {
+      get_token_info(){
+        this.$oauth.token_info();
+        console.log('get token info')
+      }
+    },
+    watch: {
+      '$store.state.is_auth'(val) {
+        if(val){
+          this.get_token_info();
+        }
+      }
+    },
+    created(){
+      if(this.$store.state.is_auth ) {
+        this.get_token_info();
+      }
+    }
+  }
 </script>
 
 <style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+@import url('bootstrap');
+@import url('./assets/css/style.css');
 </style>

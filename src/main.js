@@ -1,15 +1,86 @@
-// The Vue build version to load with the `import` command
-// (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
+import axios from 'axios'
+import VueAxios from 'vue-axios'
 import App from './App'
 import router from './router'
+import store from './store/'
+import Auth from './packages/auth/oauth'
+
+window.$ = require('jquery');
+window.jQuery = window.$;
+
+Vue.use(VueAxios, axios);
+Vue.use(Auth);
+
+let is_refreshing = false;
+let refresh_subscribers = [];
+
+
+
+Vue.axios.interceptors.response.use(function (response) {
+    if(response.data.status == 401) {
+        const original_request = response.config;
+        console.log('original_request', original_request);
+        if(!is_refreshing) {
+            is_refreshing = true;
+            Vue.oauth.refresh_token()
+            .then(newToken => {
+                is_refreshing = false;
+                onRrefreshed(newToken);
+            });
+        }
+        const retryOrigReq = new Promise((resolve, reject) => {
+            subscribeTokenRefresh(token => {
+                original_request.params = Object.assign(original_request.params, {access_token: token});
+                resolve(Vue.axios(original_request));
+            });
+        });
+        return retryOrigReq;
+
+    } else {
+        return response;
+    }
+}, function (error) {
+    return Promise.reject(error);
+});
+
+function subscribeTokenRefresh(cb) {
+    refresh_subscribers.push(cb);
+}
+  
+function onRrefreshed(token) {
+    refresh_subscribers.map(cb => cb(token));
+}
+
+Vue.axios.defaults.baseURL = 'http://127.0.0.1:3000';
 
 Vue.config.productionTip = false
 
-/* eslint-disable no-new */
-new Vue({
+router.beforeEach(
+  (to, from, next) => {
+      if (to.matched.some(record => record.meta.for_guest)) {
+          if (store.state.is_auth) {
+              next({
+                  path: '/'
+              })
+          } else next()
+      }
+      else if (to.matched.some(record => record.meta.for_auth)) {
+          if (!store.state.is_auth) {
+              next({
+                  path: '/login'
+              })
+          } else next()
+      }
+
+      else next()
+  }
+);
+
+window.vue = new Vue({
   el: '#app',
   router,
+  store,
   components: { App },
   template: '<App/>'
 })
