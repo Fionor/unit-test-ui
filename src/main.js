@@ -18,7 +18,8 @@ let refresh_subscribers = [];
 
 
 Vue.axios.interceptors.response.use(function (response) {
-    if(response.data.status == 401) {
+    
+    if(response.data.status == 401 && store.state.is_auth) {
         const original_request = response.config;
         console.log('original_request', original_request);
         if(!is_refreshing) {
@@ -31,7 +32,16 @@ Vue.axios.interceptors.response.use(function (response) {
         }
         const retryOrigReq = new Promise((resolve, reject) => {
             subscribeTokenRefresh(token => {
-                original_request.params = Object.assign(original_request.params, {access_token: token});
+                if(original_request.method == 'get'){
+                    original_request.params ? 
+                        original_request.params = Object.assign(original_request.params, {access_token: token}) 
+                        : original_request.params = {access_token: token};
+                } else {
+                    original_request.data ? 
+                        original_request.data = Object.assign(JSON.parse(original_request.data), {access_token: token}) 
+                        : original_request.data = {access_token: token};
+                }
+
                 resolve(Vue.axios(original_request));
             });
         });
@@ -44,12 +54,28 @@ Vue.axios.interceptors.response.use(function (response) {
     return Promise.reject(error);
 });
 
+Vue.axios.interceptors.request.use(function (config) {
+        if(config.method == 'get'){
+            config.params ? 
+                config.params = Object.assign(config.params, {access_token: store.state.access_token}) 
+                : config.params = {access_token: store.state.access_token};
+        } else {
+            config.data ? 
+                config.data = Object.assign(config.data, {access_token: store.state.access_token}) 
+                : config.data = {access_token: store.state.access_token};
+        }
+        return config;
+    }, function (error) {
+        return Promise.reject(error);
+});
+
 function subscribeTokenRefresh(cb) {
     refresh_subscribers.push(cb);
 }
   
 function onRrefreshed(token) {
     refresh_subscribers.map(cb => cb(token));
+    refresh_subscribers = [];
 }
 
 Vue.axios.defaults.baseURL = 'http://127.0.0.1:3000';

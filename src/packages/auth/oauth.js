@@ -1,5 +1,6 @@
 import store from '@/store';
 import router from '@/router';
+import axios from 'axios';
 
 const oauth_url = 'http://localhost:3001'
 const client_id = '5aad5632ca3438222413e105';
@@ -31,7 +32,7 @@ export default function (Vue) {
       })
     },
     register(user_data) {
-      Vue.axios.post(`${oauth_url}/user`, {
+      return Vue.axios.post(`${oauth_url}/user`, {
         username: user_data.username,
         password: user_data.password,
         role: user_data.role,
@@ -42,7 +43,7 @@ export default function (Vue) {
         if(response.data.status == 200) {
           Vue.oauth.login(user_data.username, user_data.password);
         } else {
-          alert(JSON.stringify(response.data.errors));
+          alert('Логін зайнятий');
         }
       })
     },
@@ -59,7 +60,8 @@ export default function (Vue) {
     },
     refresh_token(original_request) {
       const grant_type = 'refresh_token'
-      return Vue.axios.post(`${oauth_url}/token`, {
+      const instanse = axios.create();
+      return instanse.post(`${oauth_url}/token`, {
         grant_type,
         client_id,
         client_secret,
@@ -74,7 +76,7 @@ export default function (Vue) {
           return response.data.access_token;
         } else {
           localStorage.clear();
-          Location.reload(true);
+          location.reload(true);
         }
       });
     }

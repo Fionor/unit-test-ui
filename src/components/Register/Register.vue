@@ -46,7 +46,7 @@
             </div>
           </div>
           <div class="form-group">
-              <button type="submit" @click="register()" class="btn btn-primary btn-block"> Реєстрація  </button>
+              <button type="submit" @click="register()" class="btn btn-primary btn-block" :disabled="register_fetching"> Реєстрація  </button>
           </div>     
         </form>
         </article> 
@@ -67,7 +67,8 @@
         double_password: '',
         fio: '',
         groups: null,
-        groups_fetching: true
+        groups_fetching: true,
+        register_fetching: false
       }
     },
     methods: {
@@ -89,6 +90,7 @@
         if(this.password != this.double_password || this.password == '' || this.double_password == '' ) return alert('Не вірно введені паролі');
         if(this.password.length < 6) return alert('Пароль повинен бути не меньше 6 символів');
         if(!this.password.match(/^\w+$/)) return alert('Пароль повинен містити лише цифри та латинські літери');
+        this.register_fetching = true;
         this.$oauth.register({
           username: this.username,
           password: this.password,
@@ -96,7 +98,7 @@
           group_id: this.group_id,
           v: 1,
           fio: this.fio
-        });
+        }).then(() => this.register_fetching = false);
       }
     },
     created() {
