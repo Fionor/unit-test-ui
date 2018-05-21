@@ -7,7 +7,7 @@
       <input @click="login(username, password)" :disabled="!is_valid || data_fetching" type="submit" name="login" class="login loginmodal-submit" :value="data_fetching ? 'Завантаження...' : 'Увійти'">
     </form>
     <div class="login-help">
-      <router-link tag="a" :to="{name: 'register'}">Реєстрація</router-link> - <a href="#">Відновити пароль</a>
+      <router-link tag="a" :to="{name: 'register'}">Реєстрація</router-link> - <router-link tag="a" :to="{name: 'recovery'}">Відновити пароль</router-link>
     </div>
   </div>
 </template>

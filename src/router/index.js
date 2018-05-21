@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import Main from '@/components/Main/Main'
 import Login from '@/components/login/Login'
 import Register from '@/components/Register/Register'
+import Recovery from '@/components/Recovery/Recovery'
 import Admin from '@/components/Admin/Admin'
 
 Vue.use(Router)
@@ -33,6 +34,14 @@ export default new Router({
       path: '/register',
       name: 'register',
       component: Register,
+      meta: {
+        for_guest: true
+      }
+    },
+    {
+      path: '/recovery',
+      name: 'recovery',
+      component: Recovery,
       meta: {
         for_guest: true
       }
