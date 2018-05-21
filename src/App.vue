@@ -32,8 +32,7 @@
         console.log('get token info')
       },
       logout() {
-        localStorage.clear();
-        location.reload(true);
+        this.$oauth.logout();
       }
     },
     watch: {

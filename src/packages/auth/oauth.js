@@ -31,6 +31,14 @@ export default function (Vue) {
         return response
       })
     },
+    logout() {
+      return Vue.axios.get(`${oauth_url}/logout`).then(response => {
+        if(response.data.status == 200) {
+          localStorage.clear();
+          location.reload(true);
+        }
+      })
+    },
     register(user_data) {
       return Vue.axios.post(`${oauth_url}/user`, {
         username: user_data.username,
