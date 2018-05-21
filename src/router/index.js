@@ -5,6 +5,8 @@ import Login from '@/components/login/Login'
 import Register from '@/components/Register/Register'
 import Recovery from '@/components/Recovery/Recovery'
 import Admin from '@/components/Admin/Admin'
+import Tests from '@/components/Tests/Tests'
+import CreateTest from '@/components/Tests/Teacher/CreateTest'
 
 Vue.use(Router)
 
@@ -50,6 +52,22 @@ export default new Router({
       path: '/admin',
       name: 'admin',
       component: Admin,
+      meta: {
+        for_auth: true
+      }
+    },
+    {
+      path: '/tests',
+      name: 'tests',
+      component: Tests,
+      meta: {
+        for_auth: true
+      }
+    },
+    {
+      path: '/tests/create',
+      name: 'create-test',
+      component: CreateTest,
       meta: {
         for_auth: true
       }
