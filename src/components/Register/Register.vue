@@ -10,11 +10,11 @@
         <form @submit="e => e.preventDefault()">
           <div class="form-group">
             <label>ФІО</label>
-            <input type="email" class="form-control" v-model.trim="fio">
+            <input type="text" class="form-control" v-model.trim="fio">
           </div>
           <div class="form-group">
             <label>Логін</label>
-            <input type="email" class="form-control" v-model.trim="username">
+            <input type="text" class="form-control" v-model.trim="username">
           </div>
           <div class="form-row">
             <div class="col form-group">
