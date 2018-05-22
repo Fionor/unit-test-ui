@@ -7,7 +7,7 @@
         </div>
 
         <h2>Створенні тести</h2>
-        <div class="table-responsive">
+        <div v-if="!data_fetching" class="table-responsive">
             <table class="table table-striped table-sm">
                 <thead>
                 <tr>
@@ -15,19 +15,59 @@
                     <th>Підписників</th>
                     <th>Статус</th>
                     <th>Дата</th>
-                    <th>Дії</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr>
-                    <td>Test Name</td>
-                    <td>1</td>
-                    <td>Тестування не розпочате</td>
-                    <td>20.05.2018</td>
-                    <td>-</td>
-                </tr>
+                <router-link tag="tr" :to="{name: 'test', params: {id: test._id}}" v-for="(test, index) in data" :key="index" class="cursor-pointer">
+                    <td>{{test.name}}</td>
+                    <td>{{test.subscribers.length}}</td>
+                    <td>{{test.state_text}}</td>
+                    <td>{{moment(test.created_ad).format('DD.MM.YYYY')}}</td>
+                </router-link>
                 </tbody>
             </table>
         </div>
+        <div class="d-flex justify-content-center" v-else>
+            <i class="fa fa-4x fa-spinner fa-spin"/>
+        </div>
     </main>
 </template>
+
+<script>
+    import moment from 'moment';
+    export default {
+        data() {
+            return {
+                data: null,
+                data_fetching: true,
+                moment
+            }
+        },
+        methods: {
+            load_data() {
+                this.data_fetching = true;
+                this.axios.get('/tests.get_created?v=1').then(response => {
+                    this.data_fetching = false;
+                    this.data = response.data.response;
+                    this.data.map(test => {
+                        switch (test.state) {
+                            case 'not_defined':
+                                test.state_text = 'Тестування не розпочате';
+                                break;
+                            case 'in_progress':
+                                test.state_text = 'Відбувається тестування';
+                                break;
+                            case 'complited':
+                                test.state_text = 'Тестування завершено';
+                                break;
+                        }
+                        return test;
+                    })
+                })
+            }
+        },
+        created() {
+            this.load_data();
+        }
+    }
+</script>
