@@ -30,7 +30,7 @@
                     </div>
                 </div>
             </div> <!-- /header -->
-            <button class="btn btn-dark" @click="add_variant()">Додати варіант</button>
+            <button class="btn btn-dark d-block" @click="add_variant()">Додати варіант</button>
 
             <div class="variant pl-3 mt-3" v-for="(variant, v_index) in test.variants" :key="v_index">
                 <div class="d-flex justify-content-between">
@@ -44,31 +44,33 @@
                             <label class="text-primary font-weight-bold">В: {{v_index + 1}} Питання {{q_index + 1}}</label>
                             <h5><span @click="delete_question(v_index, q_index)" class="badge badge-danger">Видалити</span></h5>
                         </div>
+                        <div v-if="question.image_id != ''" class="d-flex justify-content-center qustion-image mb-3">
+                            <img  @click="delete_image(v_index, q_index)" :src="`${axios.defaults.baseURL}/photos.get?v=1&photo_id=${question.image_id}`" class="img-fluid img-thumbnail">
+                        </div>
                         <textarea v-model="question.name" class="form-control" rows="3"></textarea>
                     </div>
 
-                    <div class="form-group">
+                    <div v-if="question.image_id == ''" class="form-group">
                         <label for="exampleFormControlFile1">Додати фотографію</label>
-                        <input type="file" class="form-control-file" id="exampleFormControlFile1">
+                        <input @change="e => add_image(v_index, q_index, e)" type="file" class="form-control-file" id="exampleFormControlFile1">
                     </div>
 
                     <button class="btn btn-dark" @click="add_answer(v_index, q_index)">Додати відповідь</button>
                     <div class="answers">
                         <div v-for="(answer, a_index) in question.answers" :key="a_index" class="form-group form-check">
                             <div class="d-flex justify-content-between">
-                                <label class="form-check-label font-weight-bold" :class="answer.right ? 'text-success' : 'text-danger'">
+                                <label @click="set_true_answer(v_index, q_index, a_index)" class="form-check-label font-weight-bold cursor-pointer" :class="answer.right ? 'text-success' : 'text-danger'">
                                     В: {{v_index + 1}} П: {{q_index + 1}} Відповідь {{a_index + 1}}
                                 </label>
                                 <h6><span @click="delete_answer(v_index, q_index, a_index)" class="badge badge-danger">Видалити</span></h6>
                             </div>
-                            <input v-model="answer.right" :value="true" class="form-check-input" type="radio" :name="`${v_index}_${q_index}_${a_index}`">
-                            <input v-model="answer.right" :value="false" class="form-check-input mt-4" type="radio" :name="`${v_index}_${q_index}_${a_index}`">
 
                             <textarea v-model="answer.text" class="form-control" rows="3"></textarea>
                         </div>
                     </div>
                 </div>
             </div>
+            <button @click="create_test()" type="button" class="btn mt-3 mb-3" :class="test_errors.length == 0 ? 'btn-success' : 'btn-danger'">Створити</button>
         </form>
     </main>
 </template>
@@ -88,7 +90,7 @@
             }
         },
         methods: {
-            load_groups(){
+            load_groups() {
                 this.axios.get('/groups.get?v=1').then(response => {
                     if(response.data.status == 200){
                         this.groups_fetching = false;
@@ -133,6 +135,53 @@
             },
             delete_answer(v_index, q_index, a_index) {
                 if(confirm(`Видалити ${a_index + 1} відповідь ${q_index + 1} питання ${v_index + 1} варіанту?`)) this.test.variants[v_index].questions[q_index].answers.splice(a_index, 1);
+            },
+            set_true_answer(v_index, q_index, a_index) {
+                this.test.variants[v_index].questions[q_index].answers.map((answer, index) => {
+                    if(index == a_index) answer.right = true;
+                    else answer.right = false;
+                    return answer;
+                })
+            },
+            add_image(v_index, q_index, e) {
+                console.log('add image')
+                const fileName = e.target.files[0].name;
+                const idxDot = fileName.lastIndexOf(".") + 1;
+                const extFile = fileName.substr(idxDot, fileName.length).toLowerCase();
+
+                if (extFile=="jpg" || extFile=="jpeg" || extFile=="png"){
+                    let fb = new FormData();
+                    fb.append('v', 1);
+                    fb.append('photo', e.target.files[0])
+                    this.axios.post(`/photos.create`, fb).then(response => {
+                        if(response.data.status == 200){
+                            const res = response.data.response[0];
+                            this.test.variants[v_index].questions[q_index].image_id = res.photo_id;
+                        }
+                    })
+                }else{
+                    alert("Only jpg/jpeg and png files are allowed!");
+                }
+            },
+            delete_image(v_index, q_index) {
+                if(confirm(`Вдалити ілюстрацію до ${q_index + 1} питання ${v_index  + 1} варіанту?`)) {
+                    this.test.variants[v_index].questions[q_index].image_id = '';
+                    delete this.test.variants[v_index].questions[q_index].image_used;
+                }
+            },
+            create_test() {
+                if(this.test_errors.length > 0){
+                    alert(this.test_errors.reduce((p,n) => `${p}\n${n}`, ''))
+                } else {
+                    this.axios.post('/tests.create', {
+                        v: 1,
+                        ...this.test
+                    }).then(response => {
+                        if(response.data.status == 200) {
+                            this.$router.push({name: 'tests'})
+                        }
+                    })
+                }
             }
         },
         computed: {
@@ -143,6 +192,44 @@
                     groups.push({id: group_id, name: group_name})
                 })
                 return groups;
+            },
+            test_errors() {
+                let errors = [];
+                if(this.test.name == ''){
+                    errors.push(`Тест: відсутня назва тесту`);
+                }
+                if(this.test.for_groups.length == 0){
+                    errors.push(`Тест: відсутні групи для опитування`);
+                }
+                if(this.test.variants.length == 0){
+                    errors.push(`Тест: відсутні варіанти`);
+                }
+                for (let i = 0; i < this.test.variants.length; i++) {
+                    if(this.test.variants[i].questions == undefined || this.test.variants[i].questions.length == 0){
+                        errors.push(`Варіант ${i+1}: відсутні питання`);
+                        continue;
+                    }
+                    for (let j = 0; j < this.test.variants[i].questions.length; j++) {
+                        if(this.test.variants[i].questions[j].name == undefined || this.test.variants[i].questions[j].name == ''){
+                            errors.push(`Варіант ${i+1} -> Питання ${j+1}: відсутній текст питання`);
+                        }
+                        if(this.test.variants[i].questions[j].answers == undefined || this.test.variants[i].questions[j].answers.length == 0){
+                            errors.push(`Варіант ${i+1} -> Питання ${j+1}: відсутні відповіді`);
+                            continue;
+                        }
+                        let true_answers = 0;
+                        for (let l = 0; l < this.test.variants[i].questions[j].answers.length; l++) {
+                            if(this.test.variants[i].questions[j].answers[l].text == undefined || this.test.variants[i].questions[j].answers[l].text == ''){
+                                errors.push(`Варіант ${i+1} -> Питання ${j+1} -> Відповідь ${l+1}: відсутній текст відповіді`);
+                            }
+                            if(this.test.variants[i].questions[j].answers[l].right == true) true_answers = true_answers + 1;
+                        }
+                        if(true_answers == 0 || true_answers > 1){
+                            errors.push(`Варіант ${i+1} -> Питання ${j+1}: питання має більше 1ї правильної відповіді`);
+                        }
+                    }
+                }
+                return errors;
             }
         },
         created() {
@@ -151,3 +238,18 @@
     }
 </script>
 
+<style scoped>
+.qustion-image{
+    height: 256px;
+    text-align: center;
+    
+}
+
+.qustion-image > img {
+    max-width: 100%;
+    max-height: 100%;
+    height: auto;
+    width: auto;
+    margin: auto;
+}
+</style>

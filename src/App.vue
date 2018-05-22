@@ -55,4 +55,7 @@
 @import url('./assets/css/style.css');
 @import url('./assets/css/dashboard.css');
 @import url('./assets/css/font-awesome.min');
+.cursor-pointer{
+  cursor: pointer;
+}
 </style>
