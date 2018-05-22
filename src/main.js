@@ -32,16 +32,9 @@ Vue.axios.interceptors.response.use(function (response) {
         }
         const retryOrigReq = new Promise((resolve, reject) => {
             subscribeTokenRefresh(token => {
-                if(original_request.method == 'get'){
-                    original_request.params ? 
-                        original_request.params = Object.assign(original_request.params, {access_token: token}) 
-                        : original_request.params = {access_token: token};
-                } else {
-                    original_request.data ? 
-                        original_request.data = Object.assign(JSON.parse(original_request.data), {access_token: token}) 
-                        : original_request.data = {access_token: token};
-                }
-
+                original_request.params ? 
+                    original_request.params = Object.assign(original_request.params, {access_token: token}) 
+                    : original_request.params = {access_token: token};
                 resolve(Vue.axios(original_request));
             });
         });
@@ -55,15 +48,9 @@ Vue.axios.interceptors.response.use(function (response) {
 });
 
 Vue.axios.interceptors.request.use(function (config) {
-        if(config.method == 'get'){
-            config.params ? 
-                config.params = Object.assign(config.params, {access_token: store.state.access_token}) 
-                : config.params = {access_token: store.state.access_token};
-        } else {
-            config.data ? 
-                config.data = Object.assign(config.data, {access_token: store.state.access_token}) 
-                : config.data = {access_token: store.state.access_token};
-        }
+        config.params ? 
+            config.params = Object.assign(config.params, {access_token: store.state.access_token}) 
+            : config.params = {access_token: store.state.access_token};
         return config;
     }, function (error) {
         return Promise.reject(error);
