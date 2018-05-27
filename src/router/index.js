@@ -71,6 +71,15 @@ export default new Router({
       meta: {
         for_auth: true
       }
+    },
+    {
+      path: '/tests/test/:id',
+      name: 'test',
+      component: CreateTest,
+      meta: {
+        for_auth: true,
+        edit: true
+      }
     }
   ],
   linkActiveClass: 'active',

@@ -1,7 +1,13 @@
 <template>
-    <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+    <main v-if="!test_fetching" role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
             <h1>Тест</h1>
+            <div class="row">
+                <h2 v-if="test && test.state == 'not_defined'" @click="delete_test()" class="mr-3"><span class="badge badge-danger cursor-pointer">Видалити</span></h2>
+                <h2 v-if="test && test.state == 'not_defined'" @click="begin_testing()"><span class="badge badge-warning cursor-pointer">Розпочати тестування</span></h2>
+                <h2 v-if="test && test.state == 'in_progress'" @click="end_testing()"><span class="badge badge-success cursor-pointer">Закінчити тестування</span></h2>
+                <h2 v-if="test && test.state == 'complited'"><span class="badge badge-info">Тестування завершено</span></h2>
+            </div>
         </div>
         <form @submit="e => e.preventDefault()">
             <div class="form-row"> <!-- header -->
@@ -20,7 +26,7 @@
                         </select>
                     </div>
                     <div class="form-group col">
-                        <label>{{groups_fetching ? 'Завантаження' : 'Групи'}}</label>
+                        <label>{{groups_fetching ? 'Завантаження...' : 'Групи'}}</label>
                         <select v-model="selected_group" @change="e => select_group(e)" v-if="!groups_fetching" class="form-control" id="exampleFormControlSelect1">
                             <option value="">Виберіть групу</option>
                             <option v-for="(group, index) in groups" :key="index" :value="group.id">
@@ -70,8 +76,14 @@
                     </div>
                 </div>
             </div>
-            <button @click="create_test()" type="button" class="btn mt-3 mb-3" :class="test_errors.length == 0 ? 'btn-success' : 'btn-danger'">Створити</button>
+            <button v-if="$route.meta.edit && test.state == 'not_defined'" @click="create_test()" type="button" class="btn mt-3 mb-3" :class="test_errors.length == 0 ? 'btn-success' : 'btn-danger'">Зберегти</button>
+            <button v-else-if="!$route.meta.edit" @click="create_test()" type="button" class="btn mt-3 mb-3" :class="test_errors.length == 0 ? 'btn-success' : 'btn-danger'">Створити</button>
         </form>
+    </main>
+    <main v-else role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+        <div class="d-flex justify-content-center mt-5" >
+            <i class="fa fa-4x fa-spinner fa-spin"/>
+        </div>
     </main>
 </template>
 
@@ -85,13 +97,14 @@
                     variants: []
                 },
                 groups_fetching: true,
+                test_fetching: false,
                 groups: null,
                 selected_group: ''
             }
         },
         methods: {
             load_groups() {
-                this.axios.get('/groups.get?v=1').then(response => {
+                return this.axios.get('/groups.get?v=1').then(response => {
                     if(response.data.status == 200){
                         this.groups_fetching = false;
                         this.groups = response.data.response[0].groups;
@@ -173,15 +186,71 @@
                 if(this.test_errors.length > 0){
                     alert(this.test_errors.reduce((p,n) => `${p}\n${n}`, ''))
                 } else {
-                    this.axios.post('/tests.create', {
+                    this.test_fetching = true;
+                    this.axios.post('/tests.save', {
                         v: 1,
                         ...this.test
                     }).then(response => {
+                        this.test_fetching = false;
                         if(response.data.status == 200) {
-                            this.$router.push({name: 'tests'})
+                            if(this.$route.meta.edit) this.load_test();
+                            else {
+                                this.$router.push({name: 'test', params: {id: response.data.response[0].test_id}})
+                                this.load_test();
+                            }
                         }
                     })
                 }
+            },
+            load_test() {
+                this.test_fetching = true;
+                this.axios.get('/tests.get_one?v=1', {params: {
+                    id: this.$route.params.id
+                }}).then(response => {
+                    if(response.data.status == 200){
+                        this.test = response.data.response[0];
+                        this.test_fetching = false;
+                    } else {
+                        this.$router.push({name: 'tests'})
+                    }
+                });
+            },
+            delete_test() {
+                this.test_fetching = true;
+                this.axios.post(`/tests.remove`, {
+                    v: 1,
+                    id: this.$route.params.id
+                }).then(response => {
+                    this.test_fetching = false;
+                    
+                    if(response.data.status == 200){
+                        this.$router.push({name: 'tests'})
+                    }
+                });
+            },
+            begin_testing() {
+                this.test_fetching = true;
+                this.axios.post(`/tests.begin_testing`, {
+                    id: this.$route.params.id,
+                    v: 1
+                }).then((response) => {
+                    this.test_fetching = false;
+                    if(response.data.status == 200) {
+                        this.load_test();
+                    }
+                });
+            },
+            end_testing() {
+                this.test_fetching = true;
+                this.axios.post(`/tests.end_testing`, {
+                    id: this.$route.params.id,
+                    v: 1
+                }).then((response) => {
+                    this.test_fetching = false;
+                    if(response.data.status == 200) {
+                        this.load_test();
+                    }
+                });
             }
         },
         computed: {
@@ -233,7 +302,11 @@
             }
         },
         created() {
-            this.load_groups();
+            this.load_groups().then(() => {
+                if(this.$route.meta.edit){
+                    this.load_test();
+                }
+            });
         }
     }
 </script>
