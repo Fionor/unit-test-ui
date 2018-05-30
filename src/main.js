@@ -65,7 +65,7 @@ function onRrefreshed(token) {
     refresh_subscribers = [];
 }
 
-Vue.axios.defaults.baseURL = 'http://127.0.0.1:3000';
+Vue.axios.defaults.baseURL = 'http://185.86.77.96:3000';
 
 Vue.config.productionTip = false
 

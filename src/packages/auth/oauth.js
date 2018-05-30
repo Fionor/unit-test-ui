@@ -2,9 +2,9 @@ import store from '@/store';
 import router from '@/router';
 import axios from 'axios';
 
-const oauth_url = 'http://localhost:3001'
-const client_id = '5aad5632ca3438222413e105';
-const client_secret = '$2a$05$GCJTceO5YZuruK1HC0Wwd.';
+const oauth_url = 'http://185.86.77.96:3001'
+const client_id = '5b0eb3ba8c0bab6d40d9f055';
+const client_secret = '$2a$05$2HIPLeFLyeYTMzqJ1rcQL.';
 
 export default function (Vue) {
 
