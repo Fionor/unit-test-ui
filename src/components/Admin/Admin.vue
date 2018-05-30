@@ -5,16 +5,19 @@
         </div>
         <user-recovery v-if="Number($store.state.user.admin_scope & 1) == 1"/>
         <user-validate v-if="Number($store.state.user.admin_scope & 2) == 2"/>
+        <create-groups v-if="Number($store.state.user.admin_scope & 4) == 4"/>
     </main>
 </template>
 
 <script>
     import UserValidate from './Permissions/UserValidate'
     import UserRecovery from './Permissions/UserRecovery'
+    import CreateGroups from './Permissions/CreateGroups'
     export default {
         components: {
             UserValidate,
-            UserRecovery
+            UserRecovery,
+            CreateGroups
         }
     }
 </script>
