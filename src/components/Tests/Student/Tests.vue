@@ -114,6 +114,7 @@
             test.created_at = local_date;
             return test;
           });
+          this.avaliable_tests.reverse();
         })
       },
       load_progress_tests() {
@@ -126,6 +127,7 @@
             test.created_at = local_date;
             return test;
           });
+          this.progress_tests.reverse();
         })
       },
       load_complited_tests() {
@@ -138,6 +140,7 @@
             test.created_at = local_date;
             return test;
           });
+          this.complited_tests.reverse();
         })
       }
     },
