@@ -7,6 +7,7 @@ import Recovery from '@/components/Recovery/Recovery'
 import Admin from '@/components/Admin/Admin'
 import Tests from '@/components/Tests/Tests'
 import CreateTest from '@/components/Tests/Teacher/CreateTest'
+import Testing from '@/components/Tests/Student/Testing'
 
 Vue.use(Router)
 
@@ -79,6 +80,14 @@ export default new Router({
       meta: {
         for_auth: true,
         edit: true
+      }
+    },
+    {
+      path: '/tests/testing/:id',
+      name: 'testing',
+      component: Testing,
+      meta: {
+        for_auth: true
       }
     }
   ],
