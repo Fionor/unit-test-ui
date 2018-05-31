@@ -110,11 +110,11 @@
           this.avaliable_tests_fething = false;
           this.avaliable_tests = response.data.response.map(test => {
             let local_date = moment.utc(test.created_at).toDate();
-                local_date = moment(local_date).format('YYYY-MM-DD');
+                local_date = moment(local_date).format('YYYY-MM-DD HH:mm');
             test.created_at = local_date;
             return test;
           });
-          this.avaliable_tests.reverse();
+          this.avaliable_tests.sort((prev, curr) => new Date(prev.created_at) < new Date(curr.created_at));
         })
       },
       load_progress_tests() {
@@ -123,11 +123,11 @@
           this.progress_tests_fething = false;
           this.progress_tests = response.data.response.map(test => {
             let local_date = moment.utc(test.created_at).toDate();
-                local_date = moment(local_date).format('YYYY-MM-DD');
+                local_date = moment(local_date).format('YYYY-MM-DD HH:mm');
             test.created_at = local_date;
             return test;
           });
-          this.progress_tests.reverse();
+          this.progress_tests.sort((prev, curr) => new Date(prev.created_at) < new Date(curr.created_at));
         })
       },
       load_complited_tests() {
@@ -136,11 +136,11 @@
           this.complited_tests_fething = false;
           this.complited_tests = response.data.response.map(test => {
             let local_date = moment.utc(test.created_at).toDate();
-                local_date = moment(local_date).format('YYYY-MM-DD');
+                local_date = moment(local_date).format('YYYY-MM-DD HH:mm');
             test.created_at = local_date;
             return test;
           });
-          this.complited_tests.reverse();
+          this.complited_tests.sort((prev, curr) => new Date(prev.created_at) < new Date(curr.created_at));
         })
       }
     },
