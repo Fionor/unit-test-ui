@@ -1,7 +1,7 @@
 <template>
-    <div v-if="!data_fetching">
-        <h2>Верифікація</h2>
-        <div class="table-responsive">
+    <div>
+        <h2 @click="load_data()" class="cursor-pointer">Верифікація</h2>
+        <div v-if="!data_fetching" class="table-responsive">
             <table class="table table-striped table-sm">
                 <thead>
                 <tr>
@@ -23,6 +23,9 @@
                 </tr>
                 </tbody>
             </table>
+        </div>
+        <div class="d-flex justify-content-center" v-if="data_fetching">
+            <i class="fa fa-4x fa-spinner fa-spin"/>
         </div>
     </div>
 </template>
