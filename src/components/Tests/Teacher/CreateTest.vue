@@ -78,6 +78,25 @@
             </div>
             <button v-if="$route.meta.edit && test.state == 'not_defined'" @click="create_test()" type="button" class="btn mt-3 mb-3" :class="test_errors.length == 0 ? 'btn-success' : 'btn-danger'">Зберегти</button>
             <button v-else-if="!$route.meta.edit" @click="create_test()" type="button" class="btn mt-3 mb-3" :class="test_errors.length == 0 ? 'btn-success' : 'btn-danger'">Створити</button>
+            <div v-if="test.subscribers.length > 0" class="mb-4">
+                <h1>Статистика</h1>
+                <div v-for="(student, index) in students_statistic" :key="index">
+                    <div >
+                        <h5 class="col-4">ФІО: {{student.fio}}</h5>
+                        <h5 class="col-2">Варіант: {{student.variant + 1}}</h5>
+                        <h5 class="col-4">П/В: {{student.true_answers}}</h5>
+                        <h5 class="col-4">Успішність: {{student.success}}%</h5>
+                    </div>
+
+                    <div v-for="(question, q_index) in student.questions" :key="q_index" class="question mt-1 pl-3">
+                        <div >
+                            <div class="d-flex justify-content-between">
+                                <label class="font-weight-bold" :class="question.right ? 'text-success' : 'text-danger'">Питання {{q_index + 1}}</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </form>
     </main>
     <main v-else role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
@@ -97,9 +116,10 @@
                     variants: []
                 },
                 groups_fetching: true,
-                test_fetching: false,
+                test_fetching: true,
                 groups: null,
-                selected_group: ''
+                selected_group: '',
+                students_statistic: []
             }
         },
         methods: {
@@ -204,7 +224,7 @@
             },
             load_test() {
                 this.test_fetching = true;
-                this.axios.get('/tests.get_one?v=1', {params: {
+                return this.axios.get('/tests.get_one?v=1', {params: {
                     id: this.$route.params.id
                 }}).then(response => {
                     if(response.data.status == 200){
@@ -214,6 +234,18 @@
                         this.$router.push({name: 'tests'})
                     }
                 });
+            },
+            load_student_statistic(student_id) {
+                return this.axios.get(`/tests.get_users_statistic?v=1`, {
+                    params: {
+                        test_id: this.$route.params.id,
+                        student_id
+                    }
+                }).then(response => {
+                    if(response.data.status == 200){
+                        this.students_statistic.push(response.data.response[0])
+                    }
+                })
             },
             delete_test() {
                 this.test_fetching = true;
@@ -304,7 +336,11 @@
         created() {
             this.load_groups().then(() => {
                 if(this.$route.meta.edit){
-                    this.load_test();
+                    this.load_test().then(() => {
+                        this.test.subscribers.forEach(subscriber => {
+                            this.load_student_statistic(subscriber);
+                        })
+                    });
                 }
             });
         }
