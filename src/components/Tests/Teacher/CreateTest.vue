@@ -78,7 +78,7 @@
             </div>
             <button v-if="$route.meta.edit && test.state == 'not_defined'" @click="create_test()" type="button" class="btn mt-3 mb-3" :class="test_errors.length == 0 ? 'btn-success' : 'btn-danger'">Зберегти</button>
             <button v-else-if="!$route.meta.edit" @click="create_test()" type="button" class="btn mt-3 mb-3" :class="test_errors.length == 0 ? 'btn-success' : 'btn-danger'">Створити</button>
-            <div v-if="test.subscribers.length > 0" class="mb-4">
+            <div v-if="test.subscribers && test.subscribers.length > 0" class="mb-4">
                 <h1>Статистика</h1>
                 <div v-for="(student, index) in students_statistic" :key="index">
                     <div >
@@ -116,7 +116,7 @@
                     variants: []
                 },
                 groups_fetching: true,
-                test_fetching: true,
+                test_fetching: false,
                 groups: null,
                 selected_group: '',
                 students_statistic: []
