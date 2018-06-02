@@ -40,6 +40,8 @@ Vue.axios.interceptors.response.use(function (response) {
         });
         return retryOrigReq;
 
+    } else if (response.data.status == 402) {
+        location.reload(true);
     } else {
         return response;
     }
