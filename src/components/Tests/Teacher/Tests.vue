@@ -22,7 +22,7 @@
                     <td>{{test.name}}</td>
                     <td>{{test.subscribers.length}}</td>
                     <td>{{test.state_text}}</td>
-                    <td>{{moment(test.created_ad).format('DD.MM.YYYY')}}</td>
+                    <td>{{test.created_at}}</td>
                 </router-link>
                 </tbody>
             </table>
@@ -61,6 +61,9 @@
                                 test.state_text = 'Тестування завершено';
                                 break;
                         }
+                        let local_date = moment.utc(test.created_at).toDate();
+                            local_date = moment(local_date).format('YYYY-MM-DD HH:mm');
+                        test.created_at = local_date;
                         return test;
                     })
                     this.data.reverse();
