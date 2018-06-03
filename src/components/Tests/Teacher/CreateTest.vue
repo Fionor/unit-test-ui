@@ -78,7 +78,7 @@
             </div>
             <button v-if="$route.meta.edit && test.state == 'not_defined'" @click="create_test()" type="button" class="btn mt-3 mb-3" :class="test_errors.length == 0 ? 'btn-success' : 'btn-danger'">Зберегти</button>
             <button v-else-if="!$route.meta.edit" @click="create_test()" type="button" class="btn mt-3 mb-3" :class="test_errors.length == 0 ? 'btn-success' : 'btn-danger'">Створити</button>
-            <div v-if="test.subscribers && test.subscribers.length > 0" class="mb-4">
+            <div class="mb-4">
                 <h1>Статистика</h1>
                 <div v-for="(student, index) in students_statistic" :key="index">
                     <div >
@@ -107,6 +107,7 @@
 </template>
 
 <script>
+    import io from 'socket.io-client';
     export default {
         data() {
             return {
@@ -119,7 +120,8 @@
                 test_fetching: false,
                 groups: null,
                 selected_group: '',
-                students_statistic: []
+                students_statistic: [],
+                socket: null
             }
         },
         methods: {
@@ -216,7 +218,7 @@
                             if(this.$route.meta.edit) this.load_test();
                             else {
                                 this.$router.push({name: 'test', params: {id: response.data.response[0].test_id}})
-                                this.load_test();
+                                this.load_test().then(() => this.socket_init());
                             }
                         }
                     })
@@ -283,6 +285,24 @@
                         this.load_test();
                     }
                 });
+            },
+            socket_init(){ 
+                this.socket = io(this.$socket_url, {
+                    query: {
+                        room: this.$route.params.id
+                    }
+                });
+                this.socket.on('update_statistic', data => {
+                    let index = -1;
+                    this.students_statistic.forEach((student, i) => {
+                        if(student.user_student_id == data.statistic.user_student_id) index = i;
+                    })
+                    if(index != -1){
+                        this.$set(this.students_statistic, index, data.statistic);
+                    } else {
+                        this.students_statistic.push(data.statistic);
+                    }
+                })
             }
         },
         computed: {
@@ -340,9 +360,15 @@
                         this.test.subscribers.forEach(subscriber => {
                             this.load_student_statistic(subscriber);
                         })
+                        this.socket_init();
                     });
                 }
             });
+        },
+        beforeDestroy() {
+            if(this.socket) {
+                this.socket.disconnect();
+            }
         }
     }
 </script>

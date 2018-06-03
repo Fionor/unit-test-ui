@@ -68,6 +68,7 @@ function onRrefreshed(token) {
 }
 
 Vue.axios.defaults.baseURL = 'http://185.86.77.96:3000';
+Vue.prototype.$socket_url = 'http://185.86.77.96:3002';
 
 Vue.config.productionTip = false
 
