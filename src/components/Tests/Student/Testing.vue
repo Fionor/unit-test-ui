@@ -1,5 +1,5 @@
 <template>
-  <main v-if="!data_fetcing" role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+  <main v-if="!data_fetcing" role="main" class="container">
 
     <div v-if="next_step.status == 'not_begined'">
       <h1 style="text-align: center;" class="mb-4">Виберіть варіант</h1>
@@ -69,7 +69,7 @@
     </div>
 
   </main>
-  <main v-else role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+  <main v-else role="main" class="container">
     <div class="d-flex justify-content-center mt-5" >
       <i class="fa fa-4x fa-spinner fa-spin"/>
     </div>

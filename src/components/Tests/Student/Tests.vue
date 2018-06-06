@@ -1,5 +1,5 @@
 <template>
-    <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+    <main role="main" class="container">
 
         <h2 class="mt-4">Доступні тести</h2>
         <div v-if="!avaliable_tests_fething" class="table-responsive">

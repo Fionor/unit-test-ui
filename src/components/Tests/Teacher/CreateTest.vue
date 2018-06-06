@@ -1,5 +1,5 @@
 <template>
-    <main v-if="!test_fetching" role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+    <main v-if="!test_fetching" class="container">
         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
             <h1>Тест</h1>
             <div class="row">
@@ -99,7 +99,7 @@
             </div>
         </form>
     </main>
-    <main v-else role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+    <main v-else role="main" class="container">
         <div class="d-flex justify-content-center mt-5" >
             <i class="fa fa-4x fa-spinner fa-spin"/>
         </div>
