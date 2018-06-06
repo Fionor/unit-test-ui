@@ -86,7 +86,8 @@ router.beforeEach(
               next({
                   path: '/login'
               })
-          } else next()
+          } else if(store.state.user && !store.state.user.verified) next({path: '/main'}) 
+          else next();
       }
 
       else next()
